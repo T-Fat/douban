@@ -17,7 +17,8 @@ def main():
     # 1.爬取网页
     datalsit = getData(baseurl)
     # 3.保存数据
-    # savepath = ".\\豆瓣电影Top250.xls"
+    savepath = "豆瓣电影Top250.xls"
+    saveData(datalsit, savepath)
     # askURL("https://movie.douban.com/top250?start=")
 
 
@@ -86,7 +87,7 @@ def getData(baseurl):
             data.append(bd.strip())  # 去掉前后空格
 
             datalist.append(data)
-    # print(datalist) #验证采集信息
+    # print(datalist)  # 验证采集信息
     return datalist
 
 
@@ -112,9 +113,20 @@ def askURL(url):
 
 # 用户代理，表示告诉豆瓣服务器，我们是什么类型的机器，本质上是高速浏览器，我们可以接收什么水平的
 
-def saveData(savepath):
-    print("save")
+def saveData(datalist, savepath):
+    book = xlwt.Workbook(encoding='utf-8', style_compression=0)
+    sheet = book.add_sheet('豆瓣电影TOP250', cell_overwrite_ok=True)
+    col = ('电影详情链接', '图片链接', '影片中文名', '影片外文名', '评分', '评价数', '概况', '相关信息')
+    for i in range(0, 8):
+        sheet.write(0, i, col[i])
+    for i in range(0, 250):
+        data = datalist[i]
+        for j in range(0, 8):
+            sheet.write(i + 1, j, data[j])
+    book.save(savepath)
+
 
 
 if __name__ == '__main__':
     main()
+    print('over!!!')
