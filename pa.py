@@ -15,14 +15,18 @@ import sqlite3  # 进行sqllite3数据库操作
 def main():
     baseurl = "https://movie.douban.com/top250?start="
     # 1.爬取网页
-    datalsit = getData(baseurl)
+    datalist = getData(baseurl)
+    # savepath = "豆瓣电影Top250.xls"
+    dbpath = "movie.db"
     # 3.保存数据
-    savepath = "豆瓣电影Top250.xls"
-    saveData(datalsit, savepath)
+    # saveData(datalist, savepath)
+    saveData2DB(datalist, dbpath)
+
     # askURL("https://movie.douban.com/top250?start=")
 
 
 # 生成正则表达式对象，表示规则（字符串的模式）
+
 # 影片链接
 findLink = re.compile(r'<a href="(.*?)">')
 # 影片图片
@@ -126,7 +130,50 @@ def saveData(datalist, savepath):
     book.save(savepath)
 
 
+def saveData2DB(datalist, dbpath):
+    init_db(dbpath)
+    conn = sqlite3.connect(dbpath)
+    cur = conn.cursor()
+
+    for data in datalist:
+        for index in range(len(data)):
+            if index == 4 or index == 5:
+                continue
+            data[index] = '"' + data[index] + '"'
+        sql = '''
+                insert into movie250 (
+                info_link,pic_link,cname,ename,score,rated,instroduction,info)
+                values (%s)''' % ",".join(data)
+        print(sql)
+        cur.execute(sql)
+        conn.commit()
+    cur.close()
+    conn.close()
+
+
+def init_db(dbpath):
+    sql = '''
+        create table movie250
+        (
+        id integer primary key autoincrement,
+        info_link text, 
+        pic_link text,
+        cname text,
+        ename text,
+        score numeric,
+        rated numeric,
+        instroduction text,
+        info text        
+        )    
+    '''  # 创建数据库
+    conn = sqlite3.connect(dbpath)
+    curses = conn.cursor()
+    curses.execute(sql)
+    conn.commit()
+    conn.close()
+
 
 if __name__ == '__main__':
     main()
+    # init_db("movietest.db")
     print('over!!!')
